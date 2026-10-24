@@ -23,10 +23,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  /* Square-ish corners everywhere: every rounded-* utility in the app now resolves to a small radius. */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 5px;
+  --radius-2xl: 6px;
+  --radius-3xl: 6px;
+  --radius-4xl: 3px;
 }
 
 :root {
@@ -57,7 +62,6 @@
   --success: #1e7b4f;
   --warning: #e8730c;
   --danger: #c93c37;
-  --warning: #e8730c;
   --font-heading: var(--font-jakarta), sans-serif;
 }
 
@@ -66,13 +70,13 @@
 :where(input, button, a) { outline-color: var(--ring); }
 
 @layer base {
-  input, textarea, select { border-width: 1.5px; border-radius: 0.75rem; }
+  input, textarea, select { border-width: 1px; border-radius: var(--radius-lg); }
   input, select { min-height: 46px; font-size: 16px; } /* 16px stops iOS zoom-on-focus */
   textarea { font-size: 16px; }
   button:not([data-compact]), a { min-height: 0; }
 }
- 
-/* ===== ADD: critical-item highlight (seizure) ===== */
+
+/* ===== critical-item highlight (seizure) ===== */
 @keyframes critical-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgb(201 60 55 / 0.45); }
   50% { box-shadow: 0 0 0 6px rgb(201 60 55 / 0); }
@@ -80,7 +84,7 @@
 .critical-flash { background: var(--danger); color: #fff; animation: critical-pulse 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .critical-flash { animation: none; } }
 @media print { * { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
- 
+
 body { min-width: 0; overflow-x: hidden; }
 .font-semibold, .font-bold { font-weight: 600; }
 .font-medium { font-weight: 500; }
@@ -91,3 +95,61 @@ input:focus-visible { border-color: var(--ring); box-shadow: 0 0 0 3px color-mix
   body { @apply bg-background text-foreground; font-family: var(--font-inter), sans-serif; }
   button, a, input { -webkit-tap-highlight-color: transparent; }
 }
+
+/* ====================================================================
+   PRINTED DOCUMENTS (shift report, application)
+   Only #print-root is shown when printing, so the app never leaks into the PDF.
+   ==================================================================== */
+#print-root { display: none; }
+@media print {
+  @page { size: letter; margin: 0; }          /* margin 0 also removes the browser's own date/URL header and footer */
+  html, body { background: #fff !important; }
+  body > *:not(#print-root) { display: none !important; }
+  #print-root { display: block !important; }
+}
+#print-root { padding: 0 15mm; color: #0b2e22; font-family: var(--font-inter), system-ui, sans-serif; font-size: 11px; line-height: 1.5; }
+.print-frame { width: 100%; border-collapse: collapse; }
+.print-frame td { padding: 0; }
+.print-spacer { height: 14mm; }
+
+.pd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 12px; border-bottom: 3px solid #0f7a57; }
+.pd-brand { display: flex; align-items: center; gap: 12px; }
+.pd-icon { width: 48px; height: 48px; flex: none; }
+.pd-name { font-size: 22px; font-weight: 800; letter-spacing: 0.045em; line-height: 1.05; color: #0b2e22; }
+.pd-tag { margin-top: 4px; font-size: 10px; color: #527268; }
+.pd-meta { text-align: right; font-size: 10px; color: #527268; line-height: 1.55; }
+.pd-meta span { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; color: #0b2e22; }
+.pd-kind { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #0f7a57; text-transform: uppercase; margin-bottom: 3px; }
+
+.pd-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 8px 12px; border: 1px solid #0f7a57; background: #ddf4e8; }
+.pd-banner strong { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #0f7a57; }
+.pd-banner span { font-size: 10.5px; color: #0b2e22; }
+.pd-banner.warn { border-color: #c93c37; background: #fbeceb; } .pd-banner.warn strong { color: #c93c37; }
+
+.pd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #c9ddd4; border: 1px solid #c9ddd4; margin-top: 14px; }
+.pd-cell { background: #fff; padding: 7px 10px; break-inside: avoid; }
+.pd-cell.wide { grid-column: 1 / -1; }
+.pd-cell small { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #527268; }
+.pd-cell b { display: block; margin-top: 1px; font-size: 12px; font-weight: 700; color: #0b2e22; }
+
+.pd-h { margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid #3cc596; font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #0b2e22; break-after: avoid; }
+.pd-alert { margin-top: 14px; padding: 8px 12px; border: 1px solid #c93c37; border-left: 5px solid #c93c37; background: #fbeceb; font-size: 11px; break-inside: avoid; }
+.pd-alert b { color: #c93c37; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.pd-table { width: 100%; border-collapse: collapse; border: 1px solid #c9ddd4; }
+.pd-table th { padding: 5px 8px; background: #0b2e22; color: #fff; text-align: left; font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.pd-table td { padding: 6px 8px; border-top: 1px solid #c9ddd4; vertical-align: top; }
+.pd-table tr { break-inside: avoid; }
+.pd-table tbody tr:nth-child(even) td { background: #f5faf7; }
+.pd-table .t { width: 58px; font-weight: 700; white-space: nowrap; }
+.pd-table .k { width: 82px; font-size: 8.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #0f7a57; }
+
+.pd-block { border: 1px solid #c9ddd4; padding: 8px 10px; min-height: 40px; white-space: pre-wrap; break-inside: avoid; }
+.pd-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pd-cols .pd-h { margin-top: 0; }
+
+.pd-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; break-inside: avoid; }
+.pd-sign div { padding-top: 6px; border-top: 1px solid #0b2e22; font-size: 10px; color: #527268; }
+.pd-sign b { display: block; font-size: 12px; color: #0b2e22; }
+.pd-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; padding-top: 10px; border-top: 1px solid #c9ddd4; font-size: 9px; color: #527268; break-inside: avoid; }
+.pd-logo { height: 30px; width: auto; }

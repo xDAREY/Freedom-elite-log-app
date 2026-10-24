@@ -11,6 +11,7 @@ export type StaffMember = { id: string; name: string; phone: string; role: 'Nurs
 export type TimelineItem = { id: string; time: string; type: string; text: string }
 export type Shift = {
   id: string; status: 'pending' | 'incident' | 'approved' | 'rejected'; date: string
+  startedAt: string; submittedAt?: string; reviewedAt?: string; signature?: string
   staff: { name: string; role: string }
   patient: { name: string; dob: string; medicaid: string; diagnoses: Diagnosis[] }
   incident?: string; timeline: TimelineItem[]
@@ -80,6 +81,7 @@ export async function loadSupervisorData() {
       id: s.id,
       status: s.status === 'approved' ? 'approved' : s.status === 'rejected' ? 'rejected' : s.incident ? 'incident' : 'pending',
       date: dayLabel(s.started_at),
+      startedAt: s.started_at, submittedAt: s.submitted_at ?? undefined, reviewedAt: s.reviewed_at ?? undefined, signature: s.signature ?? undefined,
       staff: { name: s.nurses?.name ?? 'Unknown', role: roleLabel(s.nurses?.role) },
       patient: {
         name: pats.map((p: Patient) => p.name).join(', ') || '—',
